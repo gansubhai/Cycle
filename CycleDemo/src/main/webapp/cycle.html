@@ -1,0 +1,233 @@
+
+<html>
+<head>
+<script
+	src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.4/angular.js"></script>
+<script
+	src="http://maps.googleapis.com/maps/api/js?sensor=false&language=en"></script>
+
+<title>Cycle Demo</title>
+<script type="text/javascript">
+var cities = [{
+  city: 'India',
+  desc: 'The Indian economy is the worlds seventh-largest by nominal GDP and third-largest by purchasing power parity (PPP).',
+  lat: 23.200000,
+  long: 79.225487
+}, {
+  city: 'New Delhi',
+  desc: 'Delhi, officially the National Capital Territory of Delhi, is the Capital territory of India. It has a population of about 11 million and a metropolitan population of about 16.3 million',
+  lat: 28.500000,
+  long: 77.250000
+}, {
+  city: 'Mumbai',
+  desc: 'Mumbai, formerly called Bombay, is a sprawling, densely populated city on India’s west coast',
+  lat: 19.000000,
+  long: 72.90000
+}, {
+  city: 'Kolkata',
+  desc: 'Kolkata is the capital of the Indian state of West Bengal. It is also the commercial capital of East India, located on the east bank of the Hooghly River',
+  lat: 22.500000,
+  long: 88.400000
+}, {
+  city: 'Chennai	',
+  desc: 'Chennai holds the colonial past and is an important city of South India. It was previously known as Madras',
+  lat: 13.000000,
+  long: 80.250000
+}, {
+  city: 'Gorakhpur',
+  desc: 'Gorakhpur also known as Gorakhshpur is a city along the banks of Rapti river in the eastern part of the state of Uttar Pradesh in India, near the Nepal border 273 east of the state capital Lucknow',
+  lat: 26.7588,
+  long: 83.3697
+}];
+
+//Create angular controller.
+var app = angular.module('googleAapApp', []);
+app.controller('googleAapCtrl', function($scope, $http) {
+  $scope.highlighters = [];
+  $scope.gMap = null;
+  
+  var winInfo = new google.maps.InfoWindow();
+  
+  var googleMapOption = {
+    zoom: 4,
+    center: new google.maps.LatLng(25, 80),
+    mapTypeId: google.maps.MapTypeId.TERRAIN
+  };
+
+  $scope.gMap = new google.maps.Map(document.getElementById('googleMap'), googleMapOption);
+
+  
+
+  var createHighlighter = function(citi) {
+
+    var citiesInfo = new google.maps.Marker({
+      map: $scope.gMap,
+      position: new google.maps.LatLng(citi.lat, citi.long),
+      title: citi.city
+    });
+
+    citiesInfo.content = '<div>' + citi.desc + '</div>';
+
+    google.maps.event.addListener(citiesInfo, 'click', function() {
+      winInfo.setContent('<h1>' + citiesInfo.title + '</h1>' + citiesInfo.content);
+      winInfo.open($scope.gMap, citiesInfo);
+    });
+    $scope.highlighters.push(citiesInfo);
+  };
+
+  for (i = 0; i < cities.length; i++) {
+    createHighlighter(cities[i]);
+  }
+  
+  //
+  $scope.initLoad = function(){
+  $http.get("/getCities").then(
+  function sucessCallback(response){
+  console.log("respoknse from getCities")
+  console.log(response.data)
+  $scope.names= response.data;
+  },
+  
+  function errorCallback(response)
+  { console.log("Error in getCities")}
+  );
+  }
+  
+  
+  });
+  
+  
+            
+        </script>
+<style>
+.blue-button {
+	background: #25A6E1;
+	filter: progid: DXImageTransform.Microsoft.gradient( startColorstr='#25A6E1',
+		endColorstr='#188BC0', GradientType=0);
+	padding: 3px 5px;
+	color: #fff;
+	font-family: 'Helvetica Neue', sans-serif;
+	font-size: 12px;
+	border-radius: 2px;
+	-moz-border-radius: 2px;
+	-webkit-border-radius: 4px;
+	border: 1px solid #1A87B9
+}
+
+.red-button {
+	background: #CD5C5C;
+	padding: 3px 5px;
+	color: #fff;
+	font-family: 'Helvetica Neue', sans-serif;
+	font-size: 12px;
+	border-radius: 2px;
+	-moz-border-radius: 2px;
+	-webkit-border-radius: 4px;
+	border: 1px solid #CD5C5C
+}
+
+table {
+	font-family: "Helvetica Neue", Helvetica, sans-serif;
+	width: 50%;
+}
+
+caption {
+	text-align: left;
+	color: silver;
+	font-weight: bold;
+	text-transform: uppercase;
+	padding: 5px;
+}
+
+th {
+	background: SteelBlue;
+	color: white;
+}
+
+tbody tr:nth-child(even) {
+	background: WhiteSmoke;
+}
+
+tbody tr td:nth-child(2) {
+	text-align: center;
+}
+
+tbody tr td:nth-child(3), tbody tr td:nth-child(4) {
+	text-align: center;
+	font-family: monospace;
+}
+
+tfoot {
+	background: SeaGreen;
+	color: white;
+	text-align: right;
+}
+
+tfoot tr th:last-child {
+	font-family: monospace;
+}
+
+td, th {
+	border: 1px solid gray;
+	width: 25%;
+	text-align: left;
+	padding: 5px 10px;
+}
+</style>
+<head>
+<body ng-app="googleAapApp" ng-controller="googleAapCtrl"
+	ng-init="initLoad()">
+	<div>
+		<h1>Cycle</h1>
+		<div>
+			<select ng-model="selectedCity" ng-options="x for x in names">
+			</select>
+		</div>
+		<br />
+		<div
+			style="height: 500px; width: 500px; box-shadow: 3px 3px 10px gray;"
+			id="googleMap"></div>
+	</div>
+	<!-- <h1>Customer Mart</h1>
+	<form ng-submit="submitCustomer()">
+		<table>
+
+			<tr>
+				<th colspan="2">Add/Edit customer</th>
+			</tr>
+			<tr>
+				<td>Customer Name</td>
+				<td><input type="text" ng-model="customerForm.customerName" /></td>
+			</tr>
+			<tr>
+				<td>Email</td>
+				<td><input type="text" ng-model="customerForm.email" /></td>
+			</tr>
+			<tr>
+				<td colspan="2"><input type="submit" value="Submit"
+					class="blue-button" /></td>
+			</tr>
+		</table>
+	</form>
+	<table>
+		<tr>
+
+			<th>Customer Name</th>
+			<th>Email</th>
+			<th>Operations</th>
+
+		</tr>
+
+		<tr ng-repeat="customer in customers">
+
+			<td>{{ customer.customerName }}</td>
+			<td>{{ customer.email }}</td>
+
+			<td><a ng-click="editCustomer(customer)" class="blue-button">Edit</a>
+				| <a ng-click="deleteCustomer(customer)" class="red-button">Delete</a></td>
+		</tr>
+
+	</table>
+ -->
+</body>
+</html>
